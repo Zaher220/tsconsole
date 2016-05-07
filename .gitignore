@@ -1,0 +1,7 @@
+*[Dd]ebug*
+*[Rr]elease*
+*.user
+[Mm]akefile
+*.txt
+ui_*.h
+*.zip
