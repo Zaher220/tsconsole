@@ -45,9 +45,9 @@ struct ing{
     int start_index = 0;
     int end_index = 0;
     double area = 0;
-    void calcArea(QVector<int> * signal){
-        ;
-    }
+//    void calcArea(QVector<int> * signal){
+//        ;
+//    }
 };
 
 struct parameters{

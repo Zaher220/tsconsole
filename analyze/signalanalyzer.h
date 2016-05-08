@@ -25,8 +25,9 @@ public slots:
     void addMultiplyRawData(QVector<int> volume, QVector<int> tempin, QVector<int> tempout);
     void setFullPatientData(VTT_Data data);
 private:
-    QVector<double> median(QVector<int> *signal, int start, int end, int period);
-    void clearSignal(int start);
+    void reset();
+    QVector<double> median(QVector<int> *signal, int period);
+    QVector<double> clearSignal(QVector<double> signal);
     void integrateSignal(int start);
     void findIng(int start);
     double area(double a, double b);

@@ -36,15 +36,17 @@ int main(int argc, char *argv[])
     ADCData acqdata;
     acqdata.data[0] = vec;
     hoarder.setADCData(acqdata);
-//    SignalAnalyzer sa;
-
-//    sa.addRawData(&vec);
-
-//    auto res = sa.getAreas();
 
 
-//    for(auto & m:res)
-//        fprintf(out,"%f\n",m);
+    //    SignalAnalyzer sa;
+
+    //    sa.addRawData(&vec);
+
+    //    auto res = sa.getAreas();
+
+    auto res = analyzer.getClear();
+    for(auto & m:res)
+        fprintf(out, "%f\n", m);
     fclose(in);
     fclose(out);
 

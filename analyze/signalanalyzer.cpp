@@ -40,52 +40,24 @@ void SignalAnalyzer::setADCData(ADCData data)
 {
     m_adc_data = data;
     if( m_adc_data.data[0].size() != 0 ){
-        //QVector<int> v(data.data[0].begin(), data.data[0].end());
-//        QVector<int> v;
-//        QVector<int> v;
         this->addMultiplyRawData(m_adc_data.data[0], m_adc_data.data[0], m_adc_data.data[0]);
     }
 }
 
 void SignalAnalyzer::addRawData(QVector<int> *signal)
 {
-    //QMutexLocker lk(&m_mutex);
     int start = 0;
-    if ( m_raw_signal.size() != 0 )
-        start = m_raw_signal.size() - period + 1;
-
     m_raw_signal.append(*signal);
 
-    int end = m_raw_signal.size();
-
     QVector<double> data;
-    data = median(&m_raw_signal, start, end, period);
-    //if(m_median_signal.size() != 0)
-        //m_median_signal.erase(m_median_signal.begin() + start, m_median_signal.end());//Удалим те данные которые будут пересчитаны
+    data = median(&m_raw_signal, period);
     m_median_signal.append(data);
 
-
-    //    m_median_signal.clear();
-    //    m_clean_signal.clear();
-    //    m_int_signal.clear();
-    //    m_ings.clear();
-    //    data = median(&m_raw_signal, 0, end, period);
-    //    m_median_signal = data;
-
-    clearSignal(start);
-    findIng(start);
+    m_clean_signal = this->clearSignal(m_median_signal);
+    this->findIng(start);
 
     emit Inhalations(m_ings, m_adc_data);
     qDebug()<<"m_raw_signal size"<<m_raw_signal.size();
-
-    //    QTime tm;
-    //    tm.start();
-
-    //    m_vol_calc.setIngs(m_ings);
-    //    auto ps = m_vol_calc.getParams();
-    //      qDebug()<<"tm.elapsed() msecs"<<tm.elapsed();
-    //    ps.debug();
-    //    qDebug()<<"Stop";
 }
 
 void SignalAnalyzer::addMultiplyRawData(QVector<int> volume, QVector<int> tempin, QVector<int> tempout)
@@ -95,60 +67,60 @@ void SignalAnalyzer::addMultiplyRawData(QVector<int> volume, QVector<int> tempin
 
 void SignalAnalyzer::setFullPatientData(VTT_Data data)
 {
-    m_raw_signal.clear();
-    m_median_signal.clear();
-    m_clean_signal.clear();
-    m_int_signal.clear();
-    m_ings.clear();
+    this->reset();
     QVector<int> vec;
     for(int i=0;i<data.volume.size();i++)
         vec.push_back(data.volume.at(i)+zero_level);
     this->addRawData(&vec);
 }
 
-QVector<double> SignalAnalyzer::median(QVector<int> *signal, int start, int end, int period)
+void SignalAnalyzer::reset()
 {
+    m_raw_signal.clear();
+    m_median_signal.clear();
+    m_clean_signal.clear();
+    m_int_signal.clear();
+    m_ings.clear();
+}
 
-    //    if( signal->size() < start || signal->size() < end ){//начало или конец выходят за размер данных
-    //        return QVector<double>();
-    //    }
-    QVector<double> result;//(end-start);
-
-    QVector<double> temp(period);//Временный массив для сортировки данных при расчете медианы
-    double med = 0;//медиана
-    for(int i = start; i < end - period; i++){
+QVector<double> SignalAnalyzer::median(QVector<int> *signal, int period)
+{
+    QVector<double> result;
+    QVector<double> temp(period);//Временный массив для сортировки данных
+    //по которым расчитывается медиана
+    double med = 0;//знаение медианы
+    for(size_t i = 0; i < signal->size(); i++){
+        if( signal->size() - i - period == 0 )
+            period--;
         for(int k = 0; k < period; k++ ){
             temp[k] = signal->at(i+k);
-            //temp[k] = m_raw_signal->at(i+k);
         }
-        //memcpy(temp.data(), signal->data(), period*sizeof(int));
+      //  QVector<double> * temp = new QVector<double>(signal->begin() + i, signal->begin() + i + period);
         qSort(temp);
         if( temp.size() % 2 == 0 ){
             med = ((double)temp.at(period / 2) + (double)temp.at(period / 2 + 1)) / 2;
         }else{
             med = temp.at(period / 2 + 1);
         }
-        //result[i] = med;
         result.push_back(med);
     }
     return result;
 }
 
-void SignalAnalyzer::clearSignal(int start)/*Удалим нули т.е. промежутки когда человек не выдыхает*/
+QVector<double> SignalAnalyzer::clearSignal(QVector<double> signal)/*Удалим нули т.е. промежутки когда человек не выдыхает*/
 {
-    if(start < m_clean_signal.size()){
+    QVector<double> clean_signal;
+    clean_signal.reserve(signal.size());
 
-        m_clean_signal.erase(m_clean_signal.begin() + start, m_clean_signal.end());
-    }
-
-    for(int i = start; i < m_median_signal.size(); i++){
+    for(size_t i = 0; i < m_median_signal.size(); i++){
         if( zero_level - m_median_signal.at(i)  < 0 || abs(zero_level - m_median_signal.at(i)) < zero_sigma ){//всё что в окрестности нулевого уровня или выше прировняем к 0 уровню
-            m_clean_signal.push_back( zero_level );
+            clean_signal.push_back( zero_level );
         }else{
-            m_clean_signal.push_back( m_median_signal.at(i) );
+            clean_signal.push_back( m_median_signal.at(i) );
         }
-        //m_clean_signal[i] -= zero_level;
+        clean_signal[i] -= zero_level;
     }
+    return clean_signal;
 }
 
 void SignalAnalyzer::integrateSignal(int start)
