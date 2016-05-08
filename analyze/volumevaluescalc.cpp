@@ -22,7 +22,9 @@ parameters VolumeValuesCalc::getParams()
     ps.one_volume = this->one_volume(m_ings);
     ps.minute_volume = this->minute_volume(m_ings);
     ps.freq = this->freq(m_ings);
+    ps.av_in_time = this->av_in_time(m_ings);
     ps.av_out_time = this->av_out_time(m_ings);
+    ps.av_cycle_time = this->av_cycle_time(m_ings);
     return ps;
 }
 
@@ -69,6 +71,7 @@ double VolumeValuesCalc::minute_volume(QVector<ing> &ings)
     long double summ_volume = this->all_volume(ings);
     long double full_time =  ings.last().end_index - ings.first().start_index;
     long double minute_vol = summ_volume / ( full_time / (m_Frequancy * 60) );
+    //qDebug()<<"++ minute_vol "<<(double)minute_vol / 82000; ///83047.4;
     return minute_vol;
 }
 
@@ -95,11 +98,20 @@ double VolumeValuesCalc::av_out_time(QVector<ing> &ings)
 
 double VolumeValuesCalc::av_in_time(QVector<ing> &ings)
 {
-    return -1;
+    return this->av_cycle_time(ings) - this->av_out_time(ings);
 }
 
 double VolumeValuesCalc::av_cycle_time(QVector<ing> &ings)
 {
+    long double average_time = 0;
+    long double one_time = 0;
+    for(size_t i = 0; i < ings.size() - 1; i++){
+        one_time = ings[i + 1].max_index - ings[i].max_index;
+        average_time = ((average_time * i) + one_time) / (i + 1);
+    }
+    average_time = average_time / m_Frequancy;//Преобразуем такты ацп в секунды
+    return average_time;
+
     return -1;
 }
 
@@ -108,6 +120,7 @@ double VolumeValuesCalc::freq(QVector<ing> &ings)//Частота дыхания
     long double inh_number =  ings.size();
     long double full_time =  ings.last().end_index - ings.first().start_index;
     long double inh_freq = inh_number / ( full_time / (m_Frequancy * 60) );
+    //qDebug()<<"++ inh_freq "<<(double)inh_freq;
     return inh_freq;
 }
 

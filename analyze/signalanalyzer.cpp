@@ -49,15 +49,13 @@ void SignalAnalyzer::addRawData(QVector<int> *signal)
     int start = 0;
     m_raw_signal.append(*signal);
 
-    QVector<double> data;
-    data = median(&m_raw_signal, period);
+    QVector<double> data = median(&m_raw_signal, period);
     m_median_signal.append(data);
 
     m_clean_signal = this->clearSignal(m_median_signal);
     this->findIng(start);
 
     emit Inhalations(m_ings, m_adc_data);
-    qDebug()<<"m_raw_signal size"<<m_raw_signal.size();
 }
 
 void SignalAnalyzer::addMultiplyRawData(QVector<int> volume, QVector<int> tempin, QVector<int> tempout)
@@ -164,6 +162,15 @@ void SignalAnalyzer::findIng(int start)
         return -1;
     };
 
+    auto findMaxIndex = [](QVector<double> * data, int start_pos, int end_pos){
+        int maxindex = start_pos;
+        for(int i = start_pos; i < end_pos; i++){
+            if( fabs( data->at(i)) > fabs( data->at(i)) )
+                maxindex = i;
+        }
+        return maxindex;
+    };
+
     auto countSumm = [](QVector<double> * data, int start_pos, int end_pos){
         double summ = 0;
         for(int i = start_pos; i < end_pos; i++){
@@ -178,6 +185,7 @@ void SignalAnalyzer::findIng(int start)
 
     int zeros_start = 0;
     int zeros_end = 0;
+    int max_index = 0;
     int ind_end = 0;
 
     double summ = 0;
@@ -194,10 +202,13 @@ void SignalAnalyzer::findIng(int start)
         if( ind_end == -1 )
             return;
 
+        max_index = findMaxIndex(&m_clean_signal, zeros_end, ind_end);
+
         summ = countSumm(&m_clean_signal, zeros_end, ind_end);
 
         ingal.start_index = zeros_end;
         ingal.end_index = ind_end;
+        ingal.max_index = max_index;
         ingal.area = summ;
         m_ings.push_back(ingal);
 

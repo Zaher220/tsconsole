@@ -15,6 +15,10 @@ signals:
 
 public slots:
     void signalAndParams(parameters params, ADCData data);
+private:
+    void calibrateVolumeParams();
+    double volume_coff = 83047.4;//1540;//296675
+    parameters m_params;
 };
 
 #endif // CALIBRATOR_H

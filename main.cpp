@@ -9,7 +9,6 @@
 
 int main(int argc, char *argv[])
 {
-    printf("fuck\n");
     QCoreApplication a(argc, argv);
 
     ADCDataReader adc;
@@ -23,8 +22,6 @@ int main(int argc, char *argv[])
     QObject::connect(&analyzer, SIGNAL(Inhalations(QVector<ing>,ADCData)), &calc, SLOT(setIngs(QVector<ing>,ADCData)));
     QObject::connect(&calc, SIGNAL(signalParameters(parameters,ADCData)), &calib, SLOT(signalAndParams(parameters,ADCData)));
 
-    qDebug()<<"start point";
-
     FILE *in = fopen("in.csv", "r");
     FILE *out = fopen("out.csv", "w");
     int d = 0;
@@ -36,13 +33,6 @@ int main(int argc, char *argv[])
     ADCData acqdata;
     acqdata.data[0] = vec;
     hoarder.setADCData(acqdata);
-
-
-    //    SignalAnalyzer sa;
-
-    //    sa.addRawData(&vec);
-
-    //    auto res = sa.getAreas();
 
     auto res = analyzer.getClear();
     for(auto & m:res)
