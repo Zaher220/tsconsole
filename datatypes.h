@@ -5,6 +5,11 @@
 #include <QDebug>
 
 
+
+struct Calibrations{
+    int c;
+};
+
 struct VTT_Data{
     QVector<int> volume,tempin, tempout;
     int volZero;
@@ -14,7 +19,7 @@ struct VTT_Data{
 
 struct ADCData{
     static const int DATA_LEN = 3;
-    QVector<short> data[DATA_LEN];
+    QVector<int> data[DATA_LEN];
     void clear(){
         for(size_t i = 0; i < DATA_LEN; i++){
             data[i].clear();
@@ -70,6 +75,11 @@ struct parameters{
         qDebug()<<"av_temp_in"<<av_temp_in;
         qDebug()<<"av_temp_out"<<av_temp_out;
     }
+};
+
+struct ExperimentDescription{
+    ADCData raw_data;
+    parameters params;
 };
 
 #endif // DATATYPES

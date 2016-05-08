@@ -5,10 +5,10 @@ VolumeValuesCalc::VolumeValuesCalc(QObject *parent) : QObject(parent)
 
 }
 
-void VolumeValuesCalc::setIngs(QVector<ing> ings)
+void VolumeValuesCalc::setIngs(QVector<ing> ings, ADCData data)
 {
     m_ings = ings;
-    emit signalParameters(this->getParams());
+    emit signalParameters(this->getParams(), data);
 }
 
 parameters VolumeValuesCalc::getParams()

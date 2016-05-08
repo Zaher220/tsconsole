@@ -4,23 +4,18 @@
 #include <QObject>
 #include <QVector>
 #include "datatypes.h"
-//#include "signalanalyzer.h"
-
 
 class VolumeValuesCalc : public QObject
 {
     Q_OBJECT
 public:
     explicit VolumeValuesCalc(QObject *parent = 0);
-
-    //void setRawData();
     parameters getParams();
     void setFrequancy(int Frequancy);
-
 signals:
-    void signalParameters(parameters);
+    void signalParameters(parameters, ADCData);
 public slots:
-    void setIngs(QVector<ing> ings);
+    void setIngs(QVector<ing> ings, ADCData data);
 private:
     double av_speed(QVector<ing> & ings);
     double max_speed(QVector<ing> & ings);

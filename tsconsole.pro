@@ -3,6 +3,7 @@ QT -= gui
 
 CONFIG += c++11
 
+
 TARGET = tsconsole
 CONFIG += console
 CONFIG -= app_bundle
@@ -13,14 +14,16 @@ SOURCES += main.cpp \
     ADCDataReader.cpp \
     datahoarder.cpp \
     analyze/signalanalyzer.cpp \
-    analyze/volumevaluescalc.cpp
+    analyze/volumevaluescalc.cpp \
+    calibrator.cpp
 
 HEADERS += \
     ADCDataReader.h \
     datahoarder.h \
     datatypes.h \
     analyze/signalanalyzer.h \
-    analyze/volumevaluescalc.h
+    analyze/volumevaluescalc.h \
+    calibrator.h
 
 win32: LIBS += -L$$PWD/lib/ -lRtusbapi
 

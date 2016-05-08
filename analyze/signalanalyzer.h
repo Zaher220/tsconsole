@@ -18,7 +18,7 @@ public:
     QVector<double> getAreas();
     void setFinderPrefs(FinderPrefs prefs);    
 signals:
-    void Inhalations(QVector<ing>);
+    void Inhalations(QVector<ing>, ADCData);
 public slots:
     void setADCData(ADCData data);
     void addRawData(QVector<int> * signal);
@@ -38,6 +38,7 @@ private:
     int period = 15;
     int zero_level = 1540;
     int zero_sigma = 15;
+    ADCData m_adc_data;
 };
 
 #endif // SIGNALANALYZER_H

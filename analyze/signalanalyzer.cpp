@@ -38,7 +38,13 @@ void SignalAnalyzer::setFinderPrefs(FinderPrefs prefs)
 
 void SignalAnalyzer::setADCData(ADCData data)
 {
-
+    m_adc_data = data;
+    if( m_adc_data.data[0].size() != 0 ){
+        //QVector<int> v(data.data[0].begin(), data.data[0].end());
+//        QVector<int> v;
+//        QVector<int> v;
+        this->addMultiplyRawData(m_adc_data.data[0], m_adc_data.data[0], m_adc_data.data[0]);
+    }
 }
 
 void SignalAnalyzer::addRawData(QVector<int> *signal)
@@ -69,7 +75,7 @@ void SignalAnalyzer::addRawData(QVector<int> *signal)
     clearSignal(start);
     findIng(start);
 
-    emit Inhalations(m_ings);
+    emit Inhalations(m_ings, m_adc_data);
     qDebug()<<"m_raw_signal size"<<m_raw_signal.size();
 
     //    QTime tm;

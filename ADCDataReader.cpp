@@ -8,13 +8,10 @@
 
 ADCDataReader::ADCDataReader(QObject *parent):QObject(parent)
 {
-    char ss[] = "usb3000";
-    strcpy(mod_name, ss);
-
     //!!!ReadBuffer1 = new SHORT[/*NBlockRead **/ DataStep];
     //!!!ReadBuffer2 = new SHORT[NBlockRead * DataStep];
     //!
-    strcpy(ss1, "usb3000");
+    strcpy(m_adc_name, "usb3000");
 }
 
 ADCDataReader::~ADCDataReader()
@@ -46,15 +43,11 @@ bool ADCDataReader::initADC()
     else
         printf(" Rtusbapi.dll Version --> OK\n");
 
-    // получим указатель на интерфейс модуля USB3000
-    char ss[] = "usb3000";    
-    char *module_name = ss1;
+    // получим указатель на интерфейс модуля USB3000    
+    char *module_name = m_adc_name;
 
-    //pModule = static_cast<IRTUSB3000 *>(RtCreateInstance(s));
-    //pModule = static_cast<IRTUSB3000 *>(RtCreateInstance("usb3000"));
     pModule = static_cast<IRTUSB3000 *>(RtCreateInstance(module_name));
-    char *ptr = mod_name;
-    //pModule = static_cast<IRTUSB3000 *>(RtCreateInstance(ptr));
+
     if (!pModule){
         TerminateApplication(" Module Interface --> Bad\n");
         return false;
