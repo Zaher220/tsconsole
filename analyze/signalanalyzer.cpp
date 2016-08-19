@@ -31,7 +31,7 @@ QVector<double> SignalAnalyzer::getAreas()
 
 void SignalAnalyzer::setFinderPrefs(FinderPrefs prefs)
 {
-    period = prefs.median_period;
+    m_period = prefs.median_period;
     zero_level = prefs.zero_level;
     zero_sigma = prefs.zero_sigma;
 }
@@ -49,11 +49,11 @@ void SignalAnalyzer::addRawData(QVector<int> *signal)
     int start = 0;
     m_raw_signal.append(*signal);
 
-    QVector<double> data = median(&m_raw_signal, period);
+    QVector<double> data = median(&m_raw_signal, m_period);
     m_median_signal.append(data);
 
     m_clean_signal = this->clearSignal(m_median_signal);
-    this->findIng(start);
+    this->findExhalations(start);
 
     emit Inhalations(m_ings, m_adc_data);
 }
@@ -81,19 +81,19 @@ void SignalAnalyzer::reset()
     m_ings.clear();
 }
 
-QVector<double> SignalAnalyzer::median(QVector<int> *signal, int period)
+QVector<double> SignalAnalyzer::median(QVector<int> *signal, size_t period)
 {
     QVector<double> result;
     QVector<double> temp(period);//Временный массив для сортировки данных
     //по которым расчитывается медиана
     double med = 0;//знаение медианы
     for(size_t i = 0; i < signal->size(); i++){
-        if( signal->size() - i - period == 0 )
+        if( static_cast<size_t>(signal->size()) - i - period == 0 )
             period--;
         for(int k = 0; k < period; k++ ){
-            temp[k] = signal->at(i+k);
+            temp[k] = signal->at(i + k);
         }
-      //  QVector<double> * temp = new QVector<double>(signal->begin() + i, signal->begin() + i + period);
+        //  QVector<double> * temp = new QVector<double>(signal->begin() + i, signal->begin() + i + period);
         qSort(temp);
         if( temp.size() % 2 == 0 ){
             med = ((double)temp.at(period / 2) + (double)temp.at(period / 2 + 1)) / 2;
@@ -121,10 +121,10 @@ QVector<double> SignalAnalyzer::clearSignal(QVector<double> signal)/*Удали�
     return clean_signal;
 }
 
-void SignalAnalyzer::integrateSignal(int start)
+void SignalAnalyzer::integrateSignal(size_t start)
 {
     m_int_signal.erase(m_int_signal.begin() + start, m_int_signal.end());
-    for(int i = start; i < m_clean_signal.size(); i++){
+    for(size_t i = start; i < m_clean_signal.size(); i++){
         int a = m_clean_signal[i];
         int b = 0;
         /*if ( m_int_signal.size() == 1 )
@@ -139,41 +139,41 @@ void SignalAnalyzer::integrateSignal(int start)
 
 }
 
-void SignalAnalyzer::findIng(int start)
+void SignalAnalyzer::findExhalations(size_t start)
 {
-    auto findStartIndex = [](QVector<double> * data, int start_pos, int zero_count ){
-        for(int i = start_pos; i < data->size() - zero_count; i++){
+    auto findStartIndex = [](QVector<double> * data, size_t start_pos, size_t zero_count ){
+        for(size_t i = start_pos; i < static_cast<size_t>(data->size()) - zero_count; i++){
             bool is_zero_seq = true;
-            for(int k = i; k < i + zero_count; k++){
-                if( data->at(k) != 0 )
+            for(size_t k = i; k < i + zero_count; k++){
+                if( fabs( data->at(k)) > 0.0000001 )
                     is_zero_seq = false;
             }
             if( is_zero_seq )
-                return i;
+                return static_cast<int>(i);
         }
         return -1;
     };
 
-    auto findZeroSeqEnd = [](QVector<double> * data, int start_pos){
-        for(int i = start_pos; i < data->size(); i++){
-            if( data->at(i) != 0 )
-                return i;
+    auto findZeroSeqEnd = [](QVector<double> * data, size_t start_pos){
+        for(size_t i = start_pos; i < static_cast<size_t>(data->size()); i++){
+            if( fabs( data->at(i)) > 0.0 )
+                return static_cast<int>(i);
         }
         return -1;
     };
 
-    auto findMaxIndex = [](QVector<double> * data, int start_pos, int end_pos){
-        int maxindex = start_pos;
-        for(int i = start_pos; i < end_pos; i++){
+    auto findMaxIndex = [](QVector<double> * data, size_t start_pos, size_t end_pos){
+        size_t maxindex = start_pos;
+        for(size_t i = start_pos; i < end_pos; i++){
             if( fabs( data->at(i)) > fabs( data->at(i)) )
                 maxindex = i;
         }
         return maxindex;
     };
 
-    auto countSumm = [](QVector<double> * data, int start_pos, int end_pos){
+    auto countSumm = [](QVector<double> * data, size_t start_pos, size_t end_pos){
         double summ = 0;
-        for(int i = start_pos; i < end_pos; i++){
+        for(size_t i = start_pos; i < end_pos; i++){
             summ += data->at(i);
         }
         return summ;
@@ -189,7 +189,7 @@ void SignalAnalyzer::findIng(int start)
     int ind_end = 0;
 
     double summ = 0;
-    ing ingal;
+    exhal ingal;
     while(true){
         zeros_start = findStartIndex(&m_clean_signal, start_pos, zero_seq_leh); //найдем последовательность нулей
         if( zeros_start == -1)
@@ -202,7 +202,6 @@ void SignalAnalyzer::findIng(int start)
         if( ind_end == -1 )
             return;
 
-        max_index = findMaxIndex(&m_clean_signal, zeros_end, ind_end);
 
         summ = countSumm(&m_clean_signal, zeros_end, ind_end);
 
@@ -213,6 +212,8 @@ void SignalAnalyzer::findIng(int start)
         m_ings.push_back(ingal);
 
         start_pos = ind_end;
+        max_index = findMaxIndex(&m_clean_signal, start_pos, ind_end);
+
     }
 }
 

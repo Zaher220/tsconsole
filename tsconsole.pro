@@ -15,7 +15,8 @@ SOURCES += main.cpp \
     datahoarder.cpp \
     analyze/signalanalyzer.cpp \
     analyze/volumevaluescalc.cpp \
-    calibrator.cpp
+    calibrator.cpp \
+    temperatureparameerscalulator.cpp
 
 HEADERS += \
     ADCDataReader.h \
@@ -23,7 +24,8 @@ HEADERS += \
     datatypes.h \
     analyze/signalanalyzer.h \
     analyze/volumevaluescalc.h \
-    calibrator.h
+    calibrator.h \
+    temperatureparameerscalulator.h
 
 win32: LIBS += -L$$PWD/lib/ -lRtusbapi
 

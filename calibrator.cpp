@@ -22,3 +22,8 @@ void Calibrator::calibrateVolumeParams()
     m_params.one_volume = fabs( m_params.one_volume / volume_coff);
     m_params.debug();
 }
+
+void Calibrator::setVolume_coff(double value)
+{
+    volume_coff = value;
+}

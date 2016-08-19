@@ -41,7 +41,7 @@ struct FinderPrefs{
     int zero_level = 1540;//Нулевой уровень объёма
 };
 
-struct ing{
+struct exhal{
     int start_index = 0;
     int end_index = 0;
     int max_index = 0;

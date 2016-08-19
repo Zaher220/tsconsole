@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
 
     QObject::connect(&adc, SIGNAL(newData(ADCData)), &hoarder, SLOT(setADCData(ADCData)));
     QObject::connect(&hoarder, SIGNAL(sendADCData(ADCData)), &analyzer, SLOT(setADCData(ADCData)));
-    QObject::connect(&analyzer, SIGNAL(Inhalations(QVector<ing>,ADCData)), &calc, SLOT(setIngs(QVector<ing>,ADCData)));
+    QObject::connect(&analyzer, SIGNAL(Inhalations(QVector<exhal>,ADCData)), &calc, SLOT(setIngs(QVector<exhal>,ADCData)));
     QObject::connect(&calc, SIGNAL(signalParameters(parameters,ADCData)), &calib, SLOT(signalAndParams(parameters,ADCData)));
 
     FILE *in = fopen("in.csv", "r");
@@ -32,6 +32,8 @@ int main(int argc, char *argv[])
     }
     ADCData acqdata;
     acqdata.data[0] = vec;
+    acqdata.data[1] = vec;
+    acqdata.data[2] = vec;
     hoarder.setADCData(acqdata);
 
     auto res = analyzer.getClear();
