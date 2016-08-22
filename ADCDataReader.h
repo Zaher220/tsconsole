@@ -27,7 +27,6 @@ public slots:
     void processADC();
 signals:
     void finished();
-    //void sendACQData(AdcDataMatrix);
     void newData( ADCData );
     void done();
     void changeProgress(int);
@@ -88,9 +87,6 @@ private:
     WORD ThreadErrorNumber;
     // флажок завершения потоков ввода данных
     bool IsThreadComplete = false;
-
-    //char mod_name[8];
-
 
     HANDLE hMutex ;
     int m_samples_number = -1;//1800000;//FIXME похоже попытка мерить время АЦП - это не верно

@@ -463,15 +463,7 @@ void ADCDataReader::processADC()
 
         ADCData data;
 
-
-//        for(int i=0; i<3; i++){
-//            data.append(QVector<short>());
-//        }
-
-
         while (is_acq_started && (m_samples_number == -1 || m_samples_count <= m_samples_number) ){
-            //for (i = 0x1; i < NBlockRead; i++)
-            //{
 
             RequestNumber ^= 0x1;
             // сделаем запрос на очередную порции данных

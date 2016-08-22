@@ -3,8 +3,7 @@
 #include <vector>
 #include <QVector>
 #include <QDebug>
-
-
+#include <QMetaType>
 
 struct Calibrations{
     int c;

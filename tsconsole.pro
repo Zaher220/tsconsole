@@ -16,7 +16,8 @@ SOURCES += main.cpp \
     analyze/signalanalyzer.cpp \
     analyze/volumevaluescalc.cpp \
     calibrator.cpp \
-    temperatureparameerscalulator.cpp
+    temperatureparameerscalulator.cpp \
+    ioton.cpp
 
 HEADERS += \
     ADCDataReader.h \
@@ -25,9 +26,11 @@ HEADERS += \
     analyze/signalanalyzer.h \
     analyze/volumevaluescalc.h \
     calibrator.h \
-    temperatureparameerscalulator.h
+    temperatureparameerscalulator.h \
+    ioton.h
 
 win32: LIBS += -L$$PWD/lib/ -lRtusbapi
+
 
 INCLUDEPATH += $$PWD/
 DEPENDPATH += $$PWD/

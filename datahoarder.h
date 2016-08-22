@@ -14,8 +14,11 @@ signals:
 public slots:
     void setADCData(ADCData raw);
     void reset();
+    void uploadDataAndFree();
 private:
     ADCData m_acqdata;
+    const quint16 M_SUMPLES_NUM = 10;
+    quint16 m_samples_num = 0;
 };
 
 #endif // DATAHOARDER_H
