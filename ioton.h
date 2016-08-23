@@ -9,8 +9,6 @@
 #include "analyze/volumevaluescalc.h"
 #include "calibrator.h"
 
-
-
 class Ioton : public QObject
 {
     Q_OBJECT

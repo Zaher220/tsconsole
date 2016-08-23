@@ -1,25 +1,12 @@
 #include "ADCDataReader.h"
 
-/*DWORD WINAPI runACQ(void* Param)
-{
-    ADCDataReader* This = (ADCDataReader*)Param;
-    return This->ServiceReadThread();
-}*/
-
 ADCDataReader::ADCDataReader(QObject *parent):QObject(parent)
 {
-    //!!!ReadBuffer1 = new SHORT[/*NBlockRead **/ DataStep];
-    //!!!ReadBuffer2 = new SHORT[NBlockRead * DataStep];
-    //!
-    strcpy(m_adc_name, "usb3000");
+    strcpy_s(m_adc_name, "usb3000");
 }
 
 ADCDataReader::~ADCDataReader()
 {
-    /*if (is_acq_started)
-        stopADC();*/
-    //!!!delete[] ReadBuffer1;
-    //!!!delete[] ReadBuffer2;
 }
 
 bool ADCDataReader::initADC()
@@ -43,7 +30,7 @@ bool ADCDataReader::initADC()
     else
         printf(" Rtusbapi.dll Version --> OK\n");
 
-    // получим указатель на интерфейс модуля USB3000    
+    // получим указатель на интерфейс модуля USB3000
     char *module_name = m_adc_name;
 
     pModule = static_cast<IRTUSB3000 *>(RtCreateInstance(module_name));
@@ -171,7 +158,7 @@ bool ADCDataReader::initADC()
     //	ip.InputClockSource = RTUSB3000::EXTERNAL_INPUT_CLOCK;	// будем использовать внешние тактовые испульсы для ввода данных
     ip.SynchroType = RTUSB3000::NO_SYNCHRO;	// не будем использовать никакую синхронизацию при вводе данных
     //	ip.SynchroType = RTUSB3000::TTL_START_SYNCHRO;	// будем использовать цифровую синхронизацию старта при вводе данных
-    ip.ChannelsQuantity = ChannaleQuantity;					// четыре активных канала
+    ip.ChannelsQuantity = CHANNEL_QUANTITY;					// четыре активных канала
     for (i = 0x0; i < ip.ChannelsQuantity; i++)
         ip.ControlTable[i] = (WORD)(i);
     //меньше 550 Гц ацп не умеет переключать каналы.
@@ -211,8 +198,6 @@ bool ADCDataReader::initADC()
 
 bool ADCDataReader::WaitingForRequestCompleted(OVERLAPPED *ReadOv, LPDWORD byte_N)
 {
-    DWORD ReadBytesTransferred;
-    int count = 100;
     while (true)
     {
         if ( !is_acq_started )
@@ -226,14 +211,6 @@ bool ADCDataReader::WaitingForRequestCompleted(OVERLAPPED *ReadOv, LPDWORD byte_
                 return false;
             }
             else{
-                //!!!count--;
-                //if (kbhit()){
-                //                if(count == 0){
-                //                    ThreadErrorNumber = 0x1;
-                //                    return false;
-                //                }
-                //}
-                //else
                 Sleep(20);
             }
     }
@@ -347,18 +324,13 @@ void ADCDataReader::startADC(int samples_number)
 
     connect(m_thread, SIGNAL(started()), this, SLOT(processADC()));
     connect(this, SIGNAL(finished()), m_thread, SLOT(quit()));
-    //connect(this, SIGNAL(finished()), this, SLOT(deleteLater()));
-    //connect(m_thread, SIGNAL(finished()), m_thread, SLOT(deleteLater()));
 
     initADC();
 
     // сбросим флаг ошибок потока ввода данных
     ThreadErrorNumber = 0x0;
 
-    //ReadBuffer = ReadBuffer1;
-
     // Создаем и запускаем поток сбора ввода данных из модуля
-
 
     m_thread->start();
 }
@@ -367,8 +339,6 @@ void ADCDataReader::stopADC()
 {
     is_acq_started = false;
 
-    /*if ( pModule != NULL )
-        pModule->STOP_READ();*/
     if ( m_thread != nullptr ){
         m_thread->quit();
         m_thread->wait();
@@ -392,21 +362,6 @@ void ADCDataReader::stopADC()
         // обнулим указатель на интерфейс модуля
         pModule = NULL;
     }
-
-
-
-    //TerminateApplication("fuck");
-
-
-    // если была ошибка - сообщим об этом
-    /*if (ThreadErrorNumber) {
-        TerminateApplication(NULL, false);
-        ShowThreadErrorMessage();
-    }
-    else {
-        printf("\n");
-        TerminateApplication("\n The program was completed successfully!!!\n", false);
-    }*/
 }
 
 void ADCDataReader::processADC()
@@ -420,7 +375,6 @@ void ADCDataReader::processADC()
     OVERLAPPED ReadOv[2];
 
     DWORD BytesTransferred[2];
-    //	DWORD TimeOut;
 
     // остановим ввод данных и одновременно прочистим соответствующий канал bulk USB
     if (!pModule->STOP_READ()) {
@@ -453,14 +407,11 @@ void ADCDataReader::processADC()
 
     // теперь запускаем ввод данных
 
-    DWORD q=0;
     if (pModule->START_READ())
     {
         // цикл сбора данных
-        //i = 0x1;
         i = 0;
         m_samples_count = 0;
-
         ADCData data;
 
         while (is_acq_started && (m_samples_number == -1 || m_samples_count <= m_samples_number) ){
@@ -468,27 +419,20 @@ void ADCDataReader::processADC()
             RequestNumber ^= 0x1;
             // сделаем запрос на очередную порции данных
             if (!pModule->ReadData(ReadBuffer /*!!!+ i*DataStep*/, &DataStep, &BytesTransferred[RequestNumber], &ReadOv[RequestNumber]))
-            //if (!pModule->ReadData(ReadBuffer + i*DataStep, &DataStep, &q, &ReadOv[RequestNumber]))
                 if (GetLastError() != ERROR_IO_PENDING) {
                     ThreadErrorNumber = 0x2;
-                    // continue;
                     break;
                 }
             // ждём окончания операции сбора очередной порции данных
             if (!WaitingForRequestCompleted(&ReadOv[RequestNumber ^ 0x1], &BytesTransferred[RequestNumber])){
-                //continue;
                 break;
             }
 
-
-
-            //if ( i == NBlockRead ){
-            //for (int k = 0; k < DataStep * i; k += MaxVirtualSoltsQuantity){
             qDebug()<<"RequestNumber"<<RequestNumber;
             qDebug()<<"BytesTransferred"<< BytesTransferred[RequestNumber]<<DataStep;
 
             if(i>=1){
-                for (int k = 0; k < DataStep/*!!!BytesTransferred[RequestNumber]*/; k += ChannaleQuantity){ //FIXME нужно получать 1 точку из 10 усреднением
+                for (int k = 0; k < DataStep/*!!!BytesTransferred[RequestNumber]*/; k += CHANNEL_QUANTITY){ //FIXME нужно получать 1 точку из 10 усреднением
                     data.data[0].append(ReadBuffer[k]);
                     data.data[1].append(ReadBuffer[k+1]);
                     data.data[2].append(ReadBuffer[k+2]);
@@ -496,26 +440,10 @@ void ADCDataReader::processADC()
                 }
                 m_samples_count += data.data[0].size();
                 memset(ReadBuffer, 0, /*!!!NBlockRead **/ DataStep );
-                /*if (ReadBuffer == ReadBuffer1){
-                    ReadBuffer = ReadBuffer2;
-                    memset(ReadBuffer2, 0, NBlockRead * DataStep );
-                    //i = 0x1;//почему не равно нулю
-                    i = 0x0;
-                }
-                else{
-                    ReadBuffer = ReadBuffer1;
-                    memset(ReadBuffer1, 0, NBlockRead * DataStep );
-                    //i = 0x1;//почему не равно нулю
-                    i = 0x0;
-                }*/
-
                 emit newData(data);
                 data.clear();
             }
             i++;
-            //i = 0x1;//почему не равно нулю
-            //i = 0x0;
-            //}
         }
 
         // ждём окончания операции сбора последней порции данных
@@ -544,32 +472,9 @@ void ADCDataReader::processADC()
     IsThreadComplete = true;
     // теперь можно воходить из потока сбора данных
 
-    // подчищаем интерфейс модуля
-    /*if (pModule != NULL){
-        // освободим интерфейс модуля
-        if (!pModule->ReleaseInstance())
-            printf(" ReleaseInstance() --> Bad\n");
-        else
-            printf(" ReleaseInstance() --> OK\n");
-        // обнулим указатель на интерфейс модуля
-        pModule = NULL;
-    }
-   is_acq_started = false;*/
-
     emit finished();
     return;
 }
-
-/*AdcDataMatrix ADCDataReader::getACQData()
-{
-    AdcDataMatrix tmp_data;
-    //WaitForSingleObject(hMutex, INFINITE);
-    tmp_data = data;
-    for (int i = 0; i < data.size(); i++)
-        data[i].clear();
-    // ReleaseMutex(hMutex);
-    return tmp_data;
-}*/
 
 bool ADCDataReader::isReady()
 {
@@ -579,7 +484,6 @@ bool ADCDataReader::isReady()
         return true;
     }else
         return false;
-
 }
 
 QVector<int> ADCDataReader::getSamplesSinc(int channel, int samplesNumber)

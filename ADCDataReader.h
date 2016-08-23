@@ -66,22 +66,11 @@ private:
     //const WORD MaxVirtualSoltsQuantity = 127;
     const WORD MaxVirtualSoltsQuantity = 4;
     // частота  ввода данных
-    //const double ReadRate = 0.6;/*150Hz per channel*/
-    //const double ReadRate = 2.048;
     const double ReadRate = 0.512;
     //max возможное кол-во передаваемых отсчетов (кратное 32) для ф. ReadData и WriteData()
-    //DWORD DataStep = 1024 * 1024;
-    //DWORD DataStep = 8192;
-    const DWORD ChannaleQuantity = 3;
-    DWORD DataStep = 512*ChannaleQuantity;
+    const DWORD CHANNEL_QUANTITY = 3;
+    DWORD DataStep = 512 * CHANNEL_QUANTITY;
     SHORT	ReadBuffer[512*3];//FIXME DEFINE ???
-    //Число каналов
-
-    // столько блоков по DataStep отсчётов нужно собрать в файл
-    //!!!const WORD NBlockRead = 2;
-    // указатель на буфер для вводимых данных
-
-    //SHORT	*ReadBuffer1, *ReadBuffer2;
 
     // номер ошибки при выполнении потока сбора данных
     WORD ThreadErrorNumber;
@@ -89,9 +78,8 @@ private:
     bool IsThreadComplete = false;
 
     HANDLE hMutex ;
-    int m_samples_number = -1;//1800000;//FIXME похоже попытка мерить время АЦП - это не верно
-    int m_samples_count = 0;
-    //AdcDataMatrix data = AdcDataMatrix(MaxVirtualSoltsQuantity);
+    qint32 m_samples_number = -1;//1800000;//FIXME похоже попытка мерить время АЦП - это не верно
+    qint32 m_samples_count = 0;
     QThread *m_thread = nullptr;
     char m_adc_name[8] ;
 };
