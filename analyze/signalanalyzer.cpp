@@ -49,10 +49,14 @@ void SignalAnalyzer::addRawData(QVector<int> *signal)
     int start = 0;
     m_raw_signal.append(*signal);
 
-    QVector<double> data = median(&m_raw_signal, m_period);
-    m_median_signal.append(data);
+//    QVector<double> data = median(&m_raw_signal, m_period);
+//    m_median_signal.append(data);
+    m_median_signal = median(&m_raw_signal, m_period);
 
     m_clean_signal = this->clearSignal(m_median_signal);
+    qDebug()<<"m_raw_signal.size() "<<m_raw_signal.size();
+    qDebug()<<"m_median_signal.size() "<<m_median_signal.size();
+    qDebug()<<"m_clean_signal.size() "<<m_clean_signal.size();
     this->findExhalations(start);
 
     emit Inhalations(m_ings, m_adc_data);
@@ -81,19 +85,18 @@ void SignalAnalyzer::reset()
     m_ings.clear();
 }
 
-QVector<double> SignalAnalyzer::median(QVector<int> *signal, size_t period)
+QVector<double> SignalAnalyzer::median(QVector<int> *signal, int period)
 {
     QVector<double> result;
-    QVector<double> temp(period);//Временный массив для сортировки данных
+    QVector<double> temp((int)period);//Временный массив для сортировки данных
     //по которым расчитывается медиана
     double med = 0;//знаение медианы
-    for(size_t i = 0; i < signal->size(); i++){
-        if( static_cast<size_t>(signal->size()) - i - period == 0 )
+    for(int i = 0; i < signal->size(); i++){
+        if( signal->size() - i - (int)period == 0 )
             period--;
-        for(int k = 0; k < period; k++ ){
+        for(int k = 0; k < static_cast<int>(period); k++ ){
             temp[k] = signal->at(i + k);
         }
-        //  QVector<double> * temp = new QVector<double>(signal->begin() + i, signal->begin() + i + period);
         qSort(temp);
         if( temp.size() % 2 == 0 ){
             med = ((double)temp.at(period / 2) + (double)temp.at(period / 2 + 1)) / 2;

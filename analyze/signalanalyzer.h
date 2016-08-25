@@ -26,7 +26,7 @@ public slots:
     void setFullPatientData(VTT_Data data);
 private:
     void reset();
-    QVector<double> median(QVector<int> *signal, size_t period);
+    QVector<double> median(QVector<int> *signal, int period);
     QVector<double> clearSignal(QVector<double> signal);
     void integrateSignal(size_t start);
     void findExhalations(size_t start);

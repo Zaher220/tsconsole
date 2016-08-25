@@ -13,10 +13,6 @@ bool ADCDataReader::initADC()
 {
     WORD i;
 
-    printf(" **********************************************\n");
-    printf(" Data Reading Console Example for USB3000 unit \n");
-    printf(" **********************************************\n\n");
-
     // проверим версию используемой библиотеки Rtusbapi.dll
     if ((DllVersion = RtGetDllVersion()) != CURRENT_VERSION_RTUSBAPI){
         char String[128];
@@ -24,7 +20,7 @@ bool ADCDataReader::initADC()
                 DllVersion >> 0x10, DllVersion & 0xFFFF,
                 CURRENT_VERSION_RTUSBAPI >> 0x10, CURRENT_VERSION_RTUSBAPI & 0xFFFF);
 
-        TerminateApplication(String, false);
+        CleanupCrushADCInstance(String);
         return false;
     }
     else
@@ -32,11 +28,10 @@ bool ADCDataReader::initADC()
 
     // получим указатель на интерфейс модуля USB3000
     char *module_name = m_adc_name;
-
     pModule = static_cast<IRTUSB3000 *>(RtCreateInstance(module_name));
 
     if (!pModule){
-        TerminateApplication(" Module Interface --> Bad\n");
+        CleanupCrushADCInstance(" Module Interface --> Bad\n");
         return false;
     }
     else
@@ -46,7 +41,7 @@ bool ADCDataReader::initADC()
     for (i = 0x0; i < MaxVirtualSoltsQuantity; i++) if (pModule->OpenDevice(i)) break;
     // что-нибудь обнаружили?
     if (i == MaxVirtualSoltsQuantity){
-        TerminateApplication(" Can't find module USB3000 in first 127 virtual slots!\n");
+        CleanupCrushADCInstance(" Can't find module USB3000 in first 127 virtual slots!\n");
         return false;
     }
     else
@@ -55,14 +50,14 @@ bool ADCDataReader::initADC()
     // попробуем получить дескриптор (handle) устройства
     ModuleHandle = pModule->GetModuleHandle();
     if (ModuleHandle == INVALID_HANDLE_VALUE){
-        TerminateApplication(" GetModuleHandle() --> Bad\n");
+        CleanupCrushADCInstance(" GetModuleHandle() --> Bad\n");
         return false;
     }
     else printf(" GetModuleHandle() --> OK\n");
 
     // прочитаем название обнаруженного модуля
     if (!pModule->GetModuleName(ModuleName)) {
-        TerminateApplication(" GetModuleName() --> Bad\n");
+        CleanupCrushADCInstance(" GetModuleName() --> Bad\n");
         return false;
     }
     else
@@ -70,7 +65,7 @@ bool ADCDataReader::initADC()
 
     // проверим, что это 'USB3000'
     if (strcmp(ModuleName, "USB3000")) {
-        TerminateApplication(" The module is not 'USB3000'\n");
+        CleanupCrushADCInstance(" The module is not 'USB3000'\n");
         return false;
     }
     else
@@ -78,7 +73,7 @@ bool ADCDataReader::initADC()
 
     // узнаем текущую скорость работы шины USB20
     if (!pModule->GetUsbSpeed(&UsbSpeed)){
-        TerminateApplication(" GetUsbSpeed() --> Bad\n");
+        CleanupCrushADCInstance(" GetUsbSpeed() --> Bad\n");
         return false;
     }
     else
@@ -88,7 +83,7 @@ bool ADCDataReader::initADC()
 
     // прочитаем серийный номер модуля
     if (!pModule->GetModuleSerialNumber(ModuleSerialNumber)){
-        TerminateApplication(" GetModuleSerialNumber() --> Bad\n");
+        CleanupCrushADCInstance(" GetModuleSerialNumber() --> Bad\n");
         return false;
     }
     else
@@ -98,7 +93,7 @@ bool ADCDataReader::initADC()
 
     // прочитаем версию драйвера AVR
     if (!pModule->GetAvrVersion(AvrVersion)) {
-        TerminateApplication(" GetAvrVersion() --> Bad\n");
+        CleanupCrushADCInstance(" GetAvrVersion() --> Bad\n");
         return false;
     }
     else
@@ -108,7 +103,7 @@ bool ADCDataReader::initADC()
 
     // код драйвера DSP возьмём из соответствующего ресурса штатной DLL библиотеки
     if (!pModule->LOAD_DSP()) {
-        TerminateApplication(" LOAD_DSP() --> Bad\n");
+        CleanupCrushADCInstance(" LOAD_DSP() --> Bad\n");
         return false;
     }
     else
@@ -116,7 +111,7 @@ bool ADCDataReader::initADC()
 
     // проверим загрузку модуля
     if (!pModule->MODULE_TEST()) {
-        TerminateApplication(" MODULE_TEST() --> Bad\n");
+        CleanupCrushADCInstance(" MODULE_TEST() --> Bad\n");
         return false;
     }
     else
@@ -124,7 +119,7 @@ bool ADCDataReader::initADC()
 
     // получим версию загруженного драйвера DSP
     if (!pModule->GET_DSP_INFO(&di)) {
-        TerminateApplication(" GET_DSP_VERSION() --> Bad\n");
+        CleanupCrushADCInstance(" GET_DSP_VERSION() --> Bad\n");
         return false;
     }
     else
@@ -136,7 +131,7 @@ bool ADCDataReader::initADC()
     fi.size = sizeof(RTUSB3000::FLASH);
     // получим информацию из ППЗУ модуля
     if (!pModule->GET_FLASH(&fi)) {
-        TerminateApplication(" GET_MODULE_DESCR() --> Bad\n");
+        CleanupCrushADCInstance(" GET_MODULE_DESCR() --> Bad\n");
         return false;
     }
     else
@@ -146,7 +141,7 @@ bool ADCDataReader::initADC()
     ip.size = sizeof(RTUSB3000::INPUT_PARS);
     // получим текущие параметры работы АЦП
     if (!pModule->GET_INPUT_PARS(&ip)){
-        TerminateApplication(" GET_INPUT_PARS() --> Bad\n");
+        CleanupCrushADCInstance(" GET_INPUT_PARS() --> Bad\n");
         return false;
     }
     else
@@ -177,7 +172,7 @@ bool ADCDataReader::initADC()
     }
     // передадим требуемые параметры работы АЦП в модуль
     if (!pModule->SET_INPUT_PARS(&ip)){
-        TerminateApplication(" SET_INPUT_PARS() --> Bad\n");
+        CleanupCrushADCInstance(" SET_INPUT_PARS() --> Bad\n");
         return false;
     }
     else
@@ -237,49 +232,40 @@ void ADCDataReader::ShowThreadErrorMessage(void)
     {
     case 0x0:
         break;
-
     case 0x1:
         // если программа была злобно прервана, предъявим ноту протеста
         printf("\n READ Thread: The program was terminated! :(((\n");
         break;
-
     case 0x2:
         printf("\n READ Thread: ReadData() --> Bad :(((\n");
         break;
-
     case 0x3:
         printf("\n READ Thread: Read Request --> Bad :(((\n");
         //			printf("\n READ Thread: Timeout is occured :(((\n");
         break;
-
     case 0x4:
         printf("\n READ Thread: Buffer Data Error! :(((\n");
         break;
-
     case 0x5:
         printf("\n READ Thread: START_READ() --> Bad :(((\n");
         break;
-
     case 0x6:
         printf("\n READ Thread: STOP_READ() --> Bad! :(((\n");
         break;
-
     case 0x7:
         printf("\n READ Thread: Can't complete input and output (I/O) operations! :(((");
         break;
-
     default:
         printf("\n READ Thread: Unknown error! :(((\n");
         break;
     }
-
     return;
 }
 
 //------------------------------------------------------------------------
 // вывод сообщения и, если нужно, аварийный выход из программы
 //------------------------------------------------------------------------
-void ADCDataReader::TerminateApplication(QString ErrorString, bool TerminationFlag)
+void ADCDataReader::CleanupCrushADCInstance(QString ErrorString)
 {
     // подчищаем интерфейс модуля
     if (pModule)
@@ -292,7 +278,6 @@ void ADCDataReader::TerminateApplication(QString ErrorString, bool TerminationFl
         // обнулим указатель на интерфейс модуля
         pModule = NULL;
     }
-
     // освободим идентификатор потока сбора данных
     if (hReadThread) {
         CloseHandle(hReadThread);
@@ -309,48 +294,18 @@ void ADCDataReader::TerminateApplication(QString ErrorString, bool TerminationFl
 void ADCDataReader::startADC(int samples_number)
 {
     is_acq_started = true;
-
     setSamples_number(samples_number);
-
-    if( m_thread != nullptr ){
-        if ( m_thread->isRunning() ){
-            m_thread->terminate();
-            delete m_thread;
-            m_thread = nullptr;
-        }
-    }
-    m_thread = new QThread();
-    this->moveToThread(m_thread);
-
-    connect(m_thread, SIGNAL(started()), this, SLOT(processADC()));
-    connect(this, SIGNAL(finished()), m_thread, SLOT(quit()));
-
     initADC();
-
     // сбросим флаг ошибок потока ввода данных
     ThreadErrorNumber = 0x0;
 
-    // Создаем и запускаем поток сбора ввода данных из модуля
-
-    m_thread->start();
+    connect(this, &ADCDataReader::started, this, &ADCDataReader::processADC);
+    emit started();
 }
 
 void ADCDataReader::stopADC()
 {
     is_acq_started = false;
-
-    if ( m_thread != nullptr ){
-        m_thread->quit();
-        m_thread->wait();
-    }
-
-    if( m_thread != nullptr ){
-        if ( m_thread->isRunning() ){
-            m_thread->terminate();
-            delete m_thread;
-            m_thread = nullptr;
-        }
-    }
 
     // подчищаем интерфейс модуля
     if (pModule != NULL){
@@ -359,7 +314,6 @@ void ADCDataReader::stopADC()
             printf(" ReleaseInstance() --> Bad\n");
         else
             printf(" ReleaseInstance() --> OK\n");
-        // обнулим указатель на интерфейс модуля
         pModule = NULL;
     }
 }
@@ -377,6 +331,10 @@ void ADCDataReader::processADC()
     DWORD BytesTransferred[2];
 
     // остановим ввод данных и одновременно прочистим соответствующий канал bulk USB
+    if( pModule == NULL || pModule == nullptr ){
+        emit finished();
+        return;
+    }
     if (!pModule->STOP_READ()) {
         ThreadErrorNumber = 0x6;
         IsThreadComplete = true;
@@ -389,9 +347,6 @@ void ADCDataReader::processADC()
     memset(&ReadOv[0], 0, sizeof(OVERLAPPED)); ReadOv[0].hEvent = ReadEvent[0];
     ReadEvent[1] = CreateEvent(NULL, FALSE, FALSE, NULL);
     memset(&ReadOv[1], 0, sizeof(OVERLAPPED)); ReadOv[1].hEvent = ReadEvent[1];
-
-    // таймаут ввода данных
-    //	TimeOut = (DWORD)(DataStep/ReadRate + 1000);
 
     // делаем предварительный запрос на ввод данных
     RequestNumber = 0x0;
@@ -415,7 +370,6 @@ void ADCDataReader::processADC()
         ADCData data;
 
         while (is_acq_started && (m_samples_number == -1 || m_samples_count <= m_samples_number) ){
-
             RequestNumber ^= 0x1;
             // сделаем запрос на очередную порции данных
             if (!pModule->ReadData(ReadBuffer /*!!!+ i*DataStep*/, &DataStep, &BytesTransferred[RequestNumber], &ReadOv[RequestNumber]))
@@ -431,12 +385,11 @@ void ADCDataReader::processADC()
             qDebug()<<"RequestNumber"<<RequestNumber;
             qDebug()<<"BytesTransferred"<< BytesTransferred[RequestNumber]<<DataStep;
 
-            if(i>=1){
+            if(i >= 1){
                 for (int k = 0; k < DataStep/*!!!BytesTransferred[RequestNumber]*/; k += CHANNEL_QUANTITY){ //FIXME нужно получать 1 точку из 10 усреднением
                     data.data[0].append(ReadBuffer[k]);
                     data.data[1].append(ReadBuffer[k+1]);
                     data.data[2].append(ReadBuffer[k+2]);
-                    //data[3].push_back(ReadBuffer[k+3]);
                 }
                 m_samples_count += data.data[0].size();
                 memset(ReadBuffer, 0, /*!!!NBlockRead **/ DataStep );
@@ -445,10 +398,8 @@ void ADCDataReader::processADC()
             }
             i++;
         }
-
         // ждём окончания операции сбора последней порции данных
-        if (!ThreadErrorNumber)
-        {
+        if (!ThreadErrorNumber){
             RequestNumber ^= 0x1;
             WaitingForRequestCompleted(&ReadOv[RequestNumber ^ 0x1], &BytesTransferred[RequestNumber]);
         }
@@ -457,6 +408,10 @@ void ADCDataReader::processADC()
         ThreadErrorNumber = 0x5;
     }
 
+    if( pModule == NULL || pModule == nullptr ){
+        emit finished();
+        return;
+    }
     // остановим ввод данных
     if (!pModule->STOP_READ())
         ThreadErrorNumber = 0x6;
@@ -480,7 +435,7 @@ bool ADCDataReader::isReady()
 {
     return true;
     if( initADC()){
-        TerminateApplication("On test init");
+        CleanupCrushADCInstance("On test init");
         return true;
     }else
         return false;

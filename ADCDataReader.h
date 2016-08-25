@@ -1,15 +1,12 @@
-//#pragma once
 #ifndef ADCDATAREADER_H
 #define ADCDATAREADER_H
 #include <QObject>
 #include <stdio.h>
 #include <conio.h>
 #include <math.h>
-#include <vector>
 #include "Rtusbapi.h"
 #include "datatypes.h"
 #include <QDebug>
-#include <QThread>
 
 class ADCDataReader: public QObject
 {
@@ -30,10 +27,11 @@ signals:
     void newData( ADCData );
     void done();
     void changeProgress(int);
+    void started();
 private:
     bool initADC();
     void ShowThreadErrorMessage(void);
-    void TerminateApplication(QString ErrorString, bool TerminationFlag = false);
+    void CleanupCrushADCInstance(QString ErrorString);
     bool WaitingForRequestCompleted(OVERLAPPED *ReadOv, LPDWORD byte_N);
     bool is_acq_started = false;
 
@@ -63,7 +61,6 @@ private:
     RTUSB3000::INPUT_PARS ip;
 
     // максимально возможное кол-во опрашиваемых виртуальных слотов
-    //const WORD MaxVirtualSoltsQuantity = 127;
     const WORD MaxVirtualSoltsQuantity = 4;
     // частота  ввода данных
     const double ReadRate = 0.512;
@@ -80,7 +77,6 @@ private:
     HANDLE hMutex ;
     qint32 m_samples_number = -1;//1800000;//FIXME похоже попытка мерить время АЦП - это не верно
     qint32 m_samples_count = 0;
-    QThread *m_thread = nullptr;
     char m_adc_name[8] ;
 };
 

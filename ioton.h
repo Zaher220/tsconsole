@@ -24,7 +24,7 @@ public slots:
     void beginResearch(int msecs = 0);
     void endResearch();
 private:
-    QThread m_thread;
+    QThread m_thread, m_adc_thread;
     ADCDataReader *adc = nullptr;
     DataHoarder *hoarder = nullptr;
     SignalAnalyzer *analyzer = nullptr;

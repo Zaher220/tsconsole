@@ -13,11 +13,11 @@ int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
     Ioton ioton;
-    ioton.beginResearch(10000);
+    ioton.beginResearch(50000);
     qDebug()<<"before sleep";
-    Sleep(5000);
-    qDebug()<<"after sleep";
-    ioton.endResearch();
+//    Sleep(5000);
+//    qDebug()<<"after sleep";
+//    ioton.endResearch();
 //    ADCDataReader adc;
 //    DataHoarder hoarder;
 //    SignalAnalyzer analyzer;

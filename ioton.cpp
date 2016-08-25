@@ -17,14 +17,16 @@ Ioton::Ioton(QObject *parent) : QObject(parent)
     connect(adc, &ADCDataReader::newData, hoarder, &DataHoarder::setADCData);
     connect(adc, &ADCDataReader::finished, hoarder, &DataHoarder::uploadDataAndFree);
     connect(hoarder, SIGNAL(sendADCData(ADCData)), analyzer, SLOT(setADCData(ADCData)));
-    connect(analyzer, SIGNAL(Inhalations(QVector<exhal>,ADCData)), calc, SLOT(setIngs(QVector<exhal>,ADCData)));
-    connect(calc, SIGNAL(signalParameters(parameters,ADCData)), calib, SLOT(signalAndParams(parameters,ADCData)));
+    //connect(analyzer, SIGNAL(Inhalations(QVector<exhal>,ADCData)), calc, SLOT(setIngs(QVector<exhal>,ADCData)));
+    //connect(calc, SIGNAL(signalParameters(parameters,ADCData)), calib, SLOT(signalAndParams(parameters,ADCData)));
 
-    adc->moveToThread(&m_thread);
+    adc->moveToThread(&m_adc_thread);
+
     hoarder->moveToThread(&m_thread);
     analyzer->moveToThread(&m_thread);
     calc->moveToThread(&m_thread);
     calib->moveToThread(&m_thread);
+    m_adc_thread.start();
     m_thread.start();
 }
 
