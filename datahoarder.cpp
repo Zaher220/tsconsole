@@ -7,6 +7,7 @@ DataHoarder::DataHoarder(QObject *parent) : QObject(parent)
 
 void DataHoarder::setADCData(ADCData raw)
 {
+    //QMutexLocker locker(&m_mutex);
     m_acqdata += raw;
     if( m_samples_num%M_SUMPLES_NUM == 0 ){
         emit sendADCData(m_acqdata);

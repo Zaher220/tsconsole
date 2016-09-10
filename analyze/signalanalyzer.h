@@ -3,6 +3,8 @@
 
 #include <QObject>
 #include <QVector>
+#include <QMutex>
+#include <QMutexLocker>
 #include <QDebug>
 #include <QTime>
 #include "../datatypes.h"
@@ -26,7 +28,7 @@ public slots:
     void setFullPatientData(VTT_Data data);
 private:
     void reset();
-    QVector<double> median(QVector<int> *signal, int period);
+    QVector<double> median(const QVector<int> signal, const size_t period);
     QVector<double> clearSignal(QVector<double> signal);
     void integrateSignal(size_t start);
     void findExhalations(size_t start);
@@ -40,6 +42,7 @@ private:
     int zero_level = 1540;
     int zero_sigma = 15;
     ADCData m_adc_data;
+    QMutex m_mutex;
 };
 
 #endif // SIGNALANALYZER_H

@@ -3,6 +3,8 @@
 
 #include <QObject>
 #include "datatypes.h"
+#include <QMutex>
+#include <QMutexLocker>
 
 class DataHoarder : public QObject
 {
@@ -19,6 +21,7 @@ private:
     ADCData m_acqdata;
     const quint16 M_SUMPLES_NUM = 10;
     quint16 m_samples_num = 0;
+    QMutex m_mutex;
 };
 
 #endif // DATAHOARDER_H

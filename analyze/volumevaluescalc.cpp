@@ -15,7 +15,7 @@ void VolumeValuesCalc::setIngs(QVector<exhal> ings, ADCData data)
 parameters VolumeValuesCalc::getParams()
 {
     parameters ps;
-    if(m_ings.size()==0)
+    if(m_ings.size() == 0)
         return ps;
     ps.all_volume = all_volume(m_ings);
     ps.av_speed = av_speed(m_ings);

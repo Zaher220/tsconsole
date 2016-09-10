@@ -23,8 +23,9 @@ signals:
 public slots:
     void beginResearch(int msecs = 0);
     void endResearch();
+    void appendData(ADCData data);
 private:
-    QThread m_thread, m_adc_thread;
+    QThread m_thread, m_adc_thread, m_analyze_thread;
     ADCDataReader *adc = nullptr;
     DataHoarder *hoarder = nullptr;
     SignalAnalyzer *analyzer = nullptr;

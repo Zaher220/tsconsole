@@ -47,11 +47,11 @@ void SignalAnalyzer::setADCData(ADCData data)
 void SignalAnalyzer::addRawData(QVector<int> *signal)
 {
     int start = 0;
-    m_raw_signal.append(*signal);
+    m_raw_signal = m_adc_data.data[0];
 
-//    QVector<double> data = median(&m_raw_signal, m_period);
-//    m_median_signal.append(data);
-    m_median_signal = median(&m_raw_signal, m_period);
+    //    QVector<double> data = median(&m_raw_signal, m_period);
+    //    m_median_signal.append(data);
+    m_median_signal = median(m_raw_signal, m_period);
 
     m_clean_signal = this->clearSignal(m_median_signal);
     qDebug()<<"m_raw_signal.size() "<<m_raw_signal.size();
@@ -85,25 +85,24 @@ void SignalAnalyzer::reset()
     m_ings.clear();
 }
 
-QVector<double> SignalAnalyzer::median(QVector<int> *signal, int period)
+QVector<double> SignalAnalyzer::median(const QVector<int> signal, const size_t period)
 {
-    QVector<double> result;
-    QVector<double> temp((int)period);//Временный массив для сортировки данных
-    //по которым расчитывается медиана
     double med = 0;//знаение медианы
-    for(int i = 0; i < signal->size(); i++){
-        if( signal->size() - i - (int)period == 0 )
-            period--;
-        for(int k = 0; k < static_cast<int>(period); k++ ){
-            temp[k] = signal->at(i + k);
-        }
+    QVector<int> temp;//Временный массив для сортировки данных которым расчитывается медиана
+    temp.reserve(static_cast<int>(period));
+    QVector<double> result;
+    result.reserve(signal.size());
+
+    for(size_t i = period; i < static_cast<size_t>(signal.size()); i++){
+        for(size_t k = i - period; k < i; k++)
+            temp.push_back(signal.at(static_cast<int>(k)));
         qSort(temp);
-        if( temp.size() % 2 == 0 ){
-            med = ((double)temp.at(period / 2) + (double)temp.at(period / 2 + 1)) / 2;
-        }else{
+        if( period % 2 == 0 )
+            med = static_cast<double>(temp.at(period / 2) + temp.at(period / 2 + 1)) / 2;
+        else
             med = temp.at(period / 2 + 1);
-        }
         result.push_back(med);
+        temp.clear();
     }
     return result;
 }
@@ -113,7 +112,7 @@ QVector<double> SignalAnalyzer::clearSignal(QVector<double> signal)/*Удали�
     QVector<double> clean_signal;
     clean_signal.reserve(signal.size());
 
-    for(size_t i = 0; i < m_median_signal.size(); i++){
+    for(size_t i = 0; i < static_cast<size_t>(m_median_signal.size()); i++){
         if( zero_level - m_median_signal.at(i)  < 0 || abs(zero_level - m_median_signal.at(i)) < zero_sigma ){//всё что в окрестности нулевого уровня или выше прировняем к 0 уровню
             clean_signal.push_back( zero_level );
         }else{
@@ -144,10 +143,13 @@ void SignalAnalyzer::integrateSignal(size_t start)
 
 void SignalAnalyzer::findExhalations(size_t start)
 {
+    QMutexLocker locker(&m_mutex);
     auto findStartIndex = [](QVector<double> * data, size_t start_pos, size_t zero_count ){
+        if( data->size() - (int)zero_count < 0 )
+            return -1;
         for(size_t i = start_pos; i < static_cast<size_t>(data->size()) - zero_count; i++){
             bool is_zero_seq = true;
-            for(size_t k = i; k < i + zero_count; k++){
+            for(size_t k = i; k < i + zero_count -1; k++){
                 if( fabs( data->at(k)) > 0.0000001 )
                     is_zero_seq = false;
             }
