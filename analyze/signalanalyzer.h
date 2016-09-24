@@ -38,9 +38,9 @@ private:
     QVector<double> m_clean_signal;//сигнал после фильтра и с занулёнными промежетьками когда человек вдыхает
     QVector<double> m_int_signal;
     QVector<exhal> m_ings;
-    size_t m_period = 15;
-    int zero_level = 1540;
-    int zero_sigma = 15;
+    size_t m_period = 350;
+    int zero_level = 0;
+    int zero_sigma = 5;
     ADCData m_adc_data;
     QMutex m_mutex;
 };

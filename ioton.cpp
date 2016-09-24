@@ -6,26 +6,28 @@ Ioton::Ioton(QObject *parent) : QObject(parent)
 
     this->moveToThread(&m_thread);
     adc = new ADCDataReader();
-    hoarder = new DataHoarder();
-    analyzer = new SignalAnalyzer();
-    calc = new VolumeValuesCalc();
-    calib = new Calibrator();
+    m_signal_converter = new SignalConverter();
+    m_hoarder = new DataHoarder();
+    m_analyzer = new SignalAnalyzer();
+    m_calculator = new VolumeValuesCalc();
+    m_calibrator = new Calibrator();
 
     connect(this, &Ioton::startMeas, adc, &ADCDataReader::startADC);
     connect(this, &Ioton::stopMeas, adc, &ADCDataReader::stopADC);
 
-    connect(adc, &ADCDataReader::newData, hoarder, &DataHoarder::setADCData);
-    connect(adc, &ADCDataReader::finished, hoarder, &DataHoarder::uploadDataAndFree);
-    connect(hoarder, &DataHoarder::sendADCData, analyzer, &SignalAnalyzer::setADCData);
-    connect(analyzer, &SignalAnalyzer::Inhalations, calc, &VolumeValuesCalc::setIngs);
-    connect(calc, &VolumeValuesCalc::signalParameters, calib, &Calibrator::signalAndParams);
+    connect(adc, &ADCDataReader::newData, m_signal_converter, &SignalConverter::setADCData);
+    connect(m_signal_converter, &SignalConverter::sendADCData, m_hoarder , &DataHoarder::setADCData);
+    connect(adc, &ADCDataReader::finished, m_hoarder, &DataHoarder::uploadDataAndFree);
+    connect(m_hoarder, &DataHoarder::sendADCData, m_analyzer, &SignalAnalyzer::setADCData);
+    connect(m_analyzer, &SignalAnalyzer::Inhalations, m_calculator, &VolumeValuesCalc::setIngs);
+    connect(m_calculator, &VolumeValuesCalc::signalParameters, m_calibrator, &Calibrator::signalAndParams);
 
     adc->moveToThread(&m_thread);
 
-    hoarder->moveToThread(&m_thread);
-    analyzer->moveToThread(&m_thread);
-    calc->moveToThread(&m_thread);
-    calib->moveToThread(&m_thread);
+    m_hoarder->moveToThread(&m_thread);
+    m_analyzer->moveToThread(&m_thread);
+    m_calculator->moveToThread(&m_thread);
+    m_calibrator->moveToThread(&m_thread);
 //    m_analyze_thread.start();
 //    m_adc_thread.start();
     m_thread.start();
@@ -33,10 +35,10 @@ Ioton::Ioton(QObject *parent) : QObject(parent)
 
 Ioton::~Ioton()
 {
-    delete calib;
-    delete calc;
-    delete analyzer;
-    delete hoarder;
+    delete m_calibrator;
+    delete m_calculator;
+    delete m_analyzer;
+    delete m_hoarder;
     delete adc;
     m_thread.quit();
 }
@@ -59,5 +61,6 @@ void Ioton::endResearch()
 
 void Ioton::appendData(ADCData data)
 {
-    hoarder->setADCData(data);
+    m_signal_converter->setADCData(data);
+    //m_hoarder->setADCData(data);
 }

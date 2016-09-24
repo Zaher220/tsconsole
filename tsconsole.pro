@@ -1,8 +1,7 @@
 QT += core
 QT -= gui
 
-CONFIG += c++11
-
+CONFIG += c++14
 
 TARGET = tsconsole
 CONFIG += console
@@ -17,7 +16,8 @@ SOURCES += main.cpp \
     analyze/volumevaluescalc.cpp \
     calibrator.cpp \
     temperatureparameerscalulator.cpp \
-    ioton.cpp
+    ioton.cpp \
+    signalconverter.cpp
 
 HEADERS += \
     ADCDataReader.h \
@@ -27,7 +27,8 @@ HEADERS += \
     analyze/volumevaluescalc.h \
     calibrator.h \
     temperatureparameerscalulator.h \
-    ioton.h
+    ioton.h \
+    signalconverter.h
 
 win32: LIBS += -L$$PWD/lib/ -lRtusbapi
 

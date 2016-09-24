@@ -48,10 +48,18 @@ void SignalAnalyzer::addRawData(QVector<int> *signal)
 {
     int start = 0;
     m_raw_signal = m_adc_data.data[0];
-
-    //    QVector<double> data = median(&m_raw_signal, m_period);
-    //    m_median_signal.append(data);
     m_median_signal = median(m_raw_signal, m_period);
+
+
+//    FILE * out = nullptr;
+//    out = fopen("median.csv", "w");
+
+//    for(int i = 0; i < m_median_signal.size();i++){
+//        fprintf(out,"%f\n", m_median_signal.at(i));
+//    }
+
+//    if( out != NULL && out != nullptr )
+//        fclose(out);
 
     m_clean_signal = this->clearSignal(m_median_signal);
     qDebug()<<"m_raw_signal.size() "<<m_raw_signal.size();
@@ -170,7 +178,7 @@ void SignalAnalyzer::findExhalations(size_t start)
     auto findMaxIndex = [](QVector<double> * data, size_t start_pos, size_t end_pos){
         size_t maxindex = start_pos;
         for(size_t i = start_pos; i < end_pos; i++){
-            if( fabs( data->at(i)) > fabs( data->at(i)) )
+            if( fabs( data->at(i)) > fabs( data->at(maxindex)) )
                 maxindex = i;
         }
         return maxindex;
@@ -209,6 +217,7 @@ void SignalAnalyzer::findExhalations(size_t start)
 
 
         summ = countSumm(&m_clean_signal, zeros_end, ind_end);
+        max_index = findMaxIndex(&m_clean_signal, zeros_end, ind_end);
 
         ingal.start_index = zeros_end;
         ingal.end_index = ind_end;
@@ -217,7 +226,6 @@ void SignalAnalyzer::findExhalations(size_t start)
         m_ings.push_back(ingal);
 
         start_pos = ind_end;
-        max_index = findMaxIndex(&m_clean_signal, start_pos, ind_end);
 
     }
 }

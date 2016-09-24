@@ -44,16 +44,16 @@ int main(int argc, char *argv[])
         vec2.push_back(d2);
         vec3.push_back(d3);
 
-//        if( i%100 == 0 ){
-//            ADCData acqdata;
-//            acqdata.data[0] = vec1;
-//            acqdata.data[1] = vec2;
-//            acqdata.data[2] = vec3;
-//            vec1.clear();
-//            vec2.clear();
-//            vec3.clear();
-//            ioton.appendData(acqdata);
-//        }
+        //        if( i%100 == 0 ){
+        //            ADCData acqdata;
+        //            acqdata.data[0] = vec1;
+        //            acqdata.data[1] = vec2;
+        //            acqdata.data[2] = vec3;
+        //            vec1.clear();
+        //            vec2.clear();
+        //            vec3.clear();
+        //            ioton.appendData(acqdata);
+        //        }
 
     }
     ADCData acqdata;
@@ -64,10 +64,10 @@ int main(int argc, char *argv[])
     vec2.clear();
     vec3.clear();
     ioton.appendData(acqdata);
-//    auto res = analyzer.getClear();
-//    for(auto & m:res)
-//        fprintf(out, "%f\n", m);
-   fclose(in);
+    //    auto res = analyzer.getClear();
+    //    for(auto & m:res)
+    //        fprintf(out, "%f\n", m);
+    fclose(in);
     fclose(out);
 
     return a.exec();

@@ -7,6 +7,7 @@
 #include "datahoarder.h"
 #include "analyze/signalanalyzer.h"
 #include "analyze/volumevaluescalc.h"
+#include "signalconverter.h"
 #include "calibrator.h"
 
 class Ioton : public QObject
@@ -27,10 +28,12 @@ public slots:
 private:
     QThread m_thread, m_adc_thread, m_analyze_thread;
     ADCDataReader *adc = nullptr;
-    DataHoarder *hoarder = nullptr;
-    SignalAnalyzer *analyzer = nullptr;
-    VolumeValuesCalc *calc = nullptr;
-    Calibrator *calib = nullptr;
+    SignalConverter *m_signal_converter;
+    DataHoarder *m_hoarder = nullptr;
+    SignalAnalyzer *m_analyzer = nullptr;
+    VolumeValuesCalc *m_calculator = nullptr;
+    Calibrator *m_calibrator = nullptr;
+
 };
 
 #endif // IOTON_H

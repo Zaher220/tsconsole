@@ -36,11 +36,11 @@ private:
     double av_in_time(QVector<exhal> & ings);
     double av_cycle_time(QVector<exhal> & ings);
     double freq(QVector<exhal> & ings);
-    double av_temp_in(QVector<exhal> & ings);
+    double av_temp_in(QVector<exhal> & ings, ADCData &data);
     double av_temp_out(QVector<exhal> & ings, ADCData &data);
     QVector<exhal> m_ings;
     ADCData m_acqdata;
-    int m_Frequancy = 100;
+    int m_Frequancy = 1000;
 };
 
 #endif // VOLUMEVALUESCALC_H
